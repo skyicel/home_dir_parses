@@ -53,12 +53,23 @@ Config parse_args(int argc, char* argv[]) {
             cfg.scan_path = argv[++i];
         }
         else if (strcmp(argv[i], "--interval") == 0 && i + 1 < argc) {
-            cfg.interval_seconds = std::stoi(argv[++i]);
+            try {
+                int val = std::stoi(argv[++i]);
+                if (val <= 0) {
+                    std::cerr << "Error: interval must be positive number (got " << val << ")" << std::endl;
+                    std::cerr << "Using default value: " << cfg.interval_seconds << " seconds" << std::endl;
+                } else {
+                    cfg.interval_seconds = val;
+                }
+            } catch (const std::invalid_argument& e) {
+                std::cerr << "Error: interval must be a number (got: " << argv[i] << ")" << std::endl;
+                std::cerr << "Using default value: " << cfg.interval_seconds << " seconds" << std::endl;
+            }
         }
         else if (strcmp(argv[i], "--help") == 0) {
             std::cout << "Usage: " << argv[0] << " [OPTIONS]\n"
                       << "  --path <dir>      Directory to scan (default: HOME)\n"
-                      << "  --interval <sec>  Scan interval in seconds (default: 10)\n"
+                      << "  --interval <sec>  Scan interval in seconds (default: 10, must be > 0)\n"
                       << "  --help            Show this help\n";
             exit(0);
         }
